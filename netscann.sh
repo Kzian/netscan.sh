@@ -5,40 +5,41 @@ echo 'Enter the target IP: '
 read IP 
 
 #get wordlist
-echo 'Enter wordlist: '
-read wordlist
+#echo 'Enter wordlist: '
+#read wordlist
 
 #run nmap
 echo 'Running nmap scan on: '$IP
 nmap -p 21,80,445 -Pn -n --disable-arp-ping $IP > nmap.txt
 #check if port 80 is open
-if grep -q '80/tcp' nmap.txt; then
+if grep -q '80/tcp\s\/+open' nmap.txt; then
 	echo 'Port 80 is open. Running Nikto and Whatweb...'
 	#run nikto on port 80
-	nikto -h "http://$IP" > nikto.txt
-	whatweb "http://$IP" >> nikto.txt
+	nikto -h "http://$IP" > nikto.txt 
+	whatweb "http://$IP" >> nikto.txt 
 	
 	#Test directory brute force
 	echo 'Testing directory brute force on port 80...'
-	dirb "http://$IP/" $wordlist -r > dirb.txt
+	dirb "http://$IP/" -w -r -t 100 > dirb.txt 
 else 
 	echo 'Port 80 is closed.'
 fi
 
 #check if port 21 is open
-if grep -q '21/tcp' nmap.txt; then
+if grep -q '21/tcp\s\/+open' nmap.txt; then
 	echo 'Port 21 is open. Testing for anonymous FTP access ...'
-	ftp -n "http://$IP" <<END_SCRIPT > ftp.txt
+	ftp -n "http://$IP" > ftp.txt <<END_SCRIPT 
 quote USER anonymous
 quote PASS anonymous
 quit
 END_SCRIPT
+
 else
 	echo 'Port 21 is closed.'
 fi
 
 #check if port 445 is open
-if grep -q '445/tcp' nmap.txt; then
+if grep -q '445/tcp\s\/+open' nmap.txt; then
 	echo 'Port 445 is open. Testing for anonymous guest SMB access ...'
 	smbclient -L "http://$IP" -N > smb.txt
 else
@@ -61,11 +62,15 @@ fi
 if [[ -s dirb.txt ]]; then
 	echo 'Directory Brute Force Result'
 	cat dirb.txt
+ else 
+	echo 'file doesnt exist'
 fi
 
 if [[ -s ftp.txt ]]; then
 	echo 'FTP Result'
 	cat ftp.txt
+ else 
+	echo 'file doesnt exist'
 fi
 
 if [[ -s smb.txt ]]; then
