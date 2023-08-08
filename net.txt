@@ -2,7 +2,7 @@
 #wordlist=/usr/share/wordlists/dirb/common.txt 
 # Function to find IP addresses on the network
 find_ip_addresses() {
-    sudo netdiscover -r 10.10.10.0/24 -P -N | awk '/192\.168\./ {print $1}' > ip_addresses.txt  
+    sudo netdiscover -r 192.168.200.0/24 -P -N | awk '/192\.168\./ {print $1}' > ip_addresses.txt  
 }
 
 # Function to perform nmap scan on the extracted IP addresses
@@ -23,7 +23,7 @@ nmap_scan() {
     fi
     
     echo "Scanning third IP address: $third_ip_address"
-    nmap -p 21,80,445 -A "$third_ip_address"  
+    nmap -p 21,80,445 -A --script vuln "$third_ip_address"  
 }
 
 echo "Scanning the network for IP addresses..."
