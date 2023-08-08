@@ -37,7 +37,9 @@ nmap_scan > nmap.txt
 if grep -q '80/tcp\s\+open' nmap.txt; then
 	echo 'Port 80 is open. Running Whatweb...'
 	#run whatweb on port 80
-	whatweb "http://$third_ip_address" > netscan_result.txt		
+	whatweb "http://$third_ip_address" > netscan_result.txt	
+	#run nikto on port 80
+	#nikto -h "http://$third_ip_address" >> netscan_result.txt	
 
 echo 'Testing directory brute force on port 80...'
 	#ffuf -u "http://$third_ip_address/FUZZ" -w $wordlist -mc 200,301,302,307 -c -v -e .php,.asp,.aspx,.jsp,.html,.htm,.js,.cgi > fuff.txt
